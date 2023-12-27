@@ -1,0 +1,36 @@
+# proto-file: phrase.proto
+# proto-message: Collection
+name: "Fäke cöllëctîön"
+user_id : "fake-user-id"
+source_language: DE
+translation_language: EN_US
+discover_points: 1234
+current_discover_points: 42
+phrase: {
+  id: 4548451716323669398
+  normalized_text: "Fäke Deütsch Meßäge"
+  source_language: DE
+  translation: {
+    language: EN_US
+    text: "translation 1"
+  }
+  translation: {
+    language: EN_US
+    text: "translation 2"
+  }
+  recording: {
+    voice_gender: FEMALE
+    format: MP3
+    uri: "texttospeech/3/1/RsOka2UgRGXDvHRzY2ggTWXDn8OkZ2U=.mp3"
+    type: GOOGLE_TEXT_TO_SPEECH
+  }
+  recording: {
+    voice_gender: MALE
+    format: MP3
+    uri: "texttospeech/3/2/RsOka2UgRGXDvHRzY2ggTWXDn8OkZ2U=.mp3"
+    type: GOOGLE_TEXT_TO_SPEECH
+  }
+  score: 12345
+  correct_answers_delta: 15
+  example: "example"
+}

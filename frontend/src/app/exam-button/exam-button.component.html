@@ -1,0 +1,11 @@
+<div class="component">
+  <button mat-raised-button (click)="checkAnswer()"
+          *ngIf="isCheckAnswer()"
+          [disabled]="isCheckAnswerDisabled()" color="primary">Check
+  </button>
+
+  <button #nextButton mat-raised-button
+          (click)="continueExam()"
+          *ngIf="!isCheckAnswer()" color="primary">Continue
+  </button>
+</div>

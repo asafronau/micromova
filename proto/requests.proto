@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package micromova.proto;
+
+import "exam.proto";
+import "language.proto";
+import "phrase.proto";
+
+option java_multiple_files = true;
+option java_package = "dev.safronau.micromova.proto";
+
+message CreateCollectionRequest {
+  string name = 1;
+
+  Language source_language = 2;
+
+  Language translation_language = 3;
+
+  int32 discover_points = 4;
+}
+
+message CreateCollectionResponse {
+  CollectionView collection = 1;
+}
+
+message GenerateExamRequest {
+  // TODO: add version_id
+  string collection_name = 1;
+  // Intl.DateTimeFormat().resolvedOptions().timeZone)
+  string timezone = 2;
+}
+
+message GenerateExamResponse {
+  Exam exam = 1;
+  int32 today_score = 2;
+  int32 today_discovered_phrases = 3;
+  int32 week_discovered_phrases = 4;
+  int32 star_score_millis = 5;
+  int32 total_opened_phrases = 6;
+  int32 total_undiscovered_phrases = 7;
+  int32 unique_phrases_today = 8;
+  int32 unique_phrases_week = 9;
+}
+
+message ApplyExamResultRequest {
+  repeated TaskResult task_results = 1;
+  // TODO: add version_id
+  string collection_name = 2;
+  // Intl.DateTimeFormat().resolvedOptions().timeZone)
+  string timezone = 3;
+}
+
+message AddPhraseRequest {
+  // TODO: refactor to a different message
+  Phrase phrase = 1;
+  string collection_name = 2;
+}
+
+message AddPhraseResponse {
+  CollectionView collection = 1;
+}
+
+message LoadCollectionRequest {
+  string name = 1;
+}
+
+message LoadCollectionResponse {
+  CollectionView collection = 1;
+}
+
+message LoadCollectionsRequest {
+}
+
+message LoadCollectionsResponse {
+  repeated string names = 1;
+}
+
+message UpdateCollectionRequest {
+  string name = 1;
+  bool is_discover_enabled = 2;
+  int32 discover_points = 3;
+}
+
+message UpdateCollectionResponse {
+  CollectionView collection = 1;
+}
+
+message LoadPhraseRequest {
+  int64 id = 1  [jstype = JS_STRING];
+  string collection_name = 2;
+}
+
+message LoadPhraseResponse {
+  Phrase phrase = 1;
+}
+
+message RemovePhraseRequest {
+  int64 id = 1  [jstype = JS_STRING];
+  // TODO: unify name/collection_name
+  string collection_name = 2;
+}
+
+message RemovePhraseResponse {
+  CollectionView collection = 1;
+}

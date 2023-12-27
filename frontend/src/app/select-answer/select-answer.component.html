@@ -1,0 +1,40 @@
+<div>
+  <div class="title">Enter translation</div>
+
+  <div class="translatable">
+    <button mat-mini-fab color="accent" (click)="playSound()"
+            [disabled]="getIsTypeSource()">
+      <mat-icon>volume_up</mat-icon>
+    </button>
+    <div class="words">
+      <span>{{ getText() }}</span>
+      <div class="example-phrase" [innerHTML]="getExample()"></div>
+    </div>
+  </div>
+
+  <mat-form-field class="example-full-width">
+    <input #textInput type="text" placeholder="Start typing..."
+           [formControl]="myControl"
+           matInput [matAutocomplete]="auto"
+           (keydown.enter)="onCheckClicked();false">
+    <mat-autocomplete #auto="matAutocomplete">
+      @for (option of filteredOptions | async; track option) {
+        <mat-option [value]="option">
+          {{option}}
+        </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <div class="answer-container">
+    <div *ngIf="checkAnswer" [ngClass]="getAnswerClass()" class="answer">
+      {{ getCorrectAnswer() }}
+    </div>
+  </div>
+
+  <app-exam-button [role]="getButtonRole()"
+                   [checkAnswerDisabled]="isCheckAnswerDisabled()"
+                   (checkClicked)="onCheckClicked()"
+                   (continueClicked)="onContinueClicked()">
+  </app-exam-button>
+</div>

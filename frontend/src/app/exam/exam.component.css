@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  margin: 12px;
+}
+
+app-score-strength {
+  vertical-align: middle;
+}
+
+.component {
+  margin: 0 auto;
+  max-width: 560px;
+  padding-top: 8px;
+}
+
+.recent {
+  display: inline-block;
+  margin-left: 16px;
+  font-size: 13px;
+}
+
+div.score {
+  display: inline-block;
+  float: right;
+  font-weight: 500;
+  margin-bottom: 16px;
+  text-align: right;
+}
+
+span.score {
+  background: lightgreen;
+  border-radius: 12px;
+  padding: 8px;
+  font-size: 12px;
+}

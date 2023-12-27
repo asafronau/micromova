@@ -1,0 +1,138 @@
+buildscript {
+  dependencies {
+    classpath "com.google.cloud.tools:appengine-gradle-plugin:2.5.0"
+    classpath "com.google.protobuf:protobuf-gradle-plugin:0.9.4"
+  }
+}
+
+plugins {
+  id "application"
+  id "com.github.johnrengelman.shadow" version "8.1.1"
+  id "com.google.protobuf" version("0.9.4")
+  id "idea"
+  id "io.micronaut.application" version("4.2.0")
+  id("io.micronaut.aot") version "4.2.0"
+  id "java"
+}
+
+apply plugin: "com.google.cloud.tools.appengine-appyaml"
+
+repositories {
+  mavenCentral()
+}
+
+shadowJar {
+  mergeServiceFiles()
+}
+
+dependencies {
+
+  protobuf files("../proto")
+  runtimeOnly("org.yaml:snakeyaml")
+
+  annotationProcessor("io.micronaut:micronaut-http-validation")
+  annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
+
+  implementation("jakarta.annotation:jakarta.annotation-api")
+  implementation("io.micronaut.grpc:micronaut-protobuff-support")
+  implementation("io.micronaut.reactor:micronaut-reactor")
+  implementation("io.micronaut.serde:micronaut-serde-jackson")
+
+  implementation("com.google.auth:google-auth-library-oauth2-http:1.20.0") // 1.3.0
+  implementation("com.google.api-client:google-api-client:2.2.0")
+  implementation("com.google.apis:google-api-services-datastore:v1-rev20230905-2.0.0")
+  implementation("com.google.apis:google-api-services-texttospeech:v1beta1-rev20231023-2.0.0")
+  implementation("com.google.apis:google-api-services-storage:v1-rev20231028-2.0.0")
+
+  implementation("com.google.guava:guava")
+  implementation("com.google.protobuf:protobuf-java")
+  implementation("com.google.flogger:flogger:0.8")
+  implementation(platform("com.google.cloud:libraries-bom:26.27.0"))
+
+  // implementation("io.micronaut.gcp:micronaut-gcp-tracing:4.8.0")
+  // implementation("io.micronaut.gcp:micronaut-gcp-common:4.8.0")
+  // implementation("io.micronaut.gcp:micronaut-gcp-logging:4.8.0")
+
+  implementation("com.google.flogger:flogger-system-backend:0.8")
+  implementation("com.google.flogger:flogger-slf4j-backend:0.8")
+
+  testAnnotationProcessor("io.micronaut:micronaut-inject-java")
+  testImplementation group: "org.mockito", name: "mockito-junit-jupiter", version: "5.7.0"
+  testImplementation("io.micronaut.test:micronaut-test-junit5")
+  testImplementation("com.google.truth:truth:1.1.5")
+  testImplementation("io.micronaut:micronaut-http-client")
+  testImplementation("org.junit.jupiter:junit-jupiter-api")
+  testImplementation("org.junit.jupiter:junit-jupiter-engine")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+}
+
+protobuf {
+  protoc {
+    artifact = "com.google.protobuf:protoc:3.25.1"
+  }
+}
+
+application {
+  mainClass.set("dev.safronau.micromova.gaebackend.Application")
+}
+
+java {
+  sourceCompatibility = JavaVersion.toVersion("17")
+  targetCompatibility = JavaVersion.toVersion("17")
+}
+
+micronaut {
+  runtime("netty")
+  testRuntime("junit5")
+  processing {
+    incremental(true)
+    annotations("dev.safronau.*")
+  }
+  aot {
+    // Please review carefully the optimizations enabled below
+    // Check https://micronaut-projects.github.io/micronaut-aot/latest/guide/ for more details
+    optimizeServiceLoading = false
+    convertYamlToJava = false
+    precomputeOperations = true
+    cacheEnvironment = true
+    optimizeClassLoading = true
+    deduceEnvironment = true
+    optimizeNetty = true
+  }
+}
+test {
+  useJUnitPlatform()
+}
+
+/** Java debug information: */
+tasks.withType(JavaCompile) {
+  //options.compilerArgs += [
+  //  "-parameters",
+  //]
+  // options.debug = false
+}
+
+ext {
+  appEngineProjectVersion = project.properties["appEngineProjectVersion"] ?: "the-beta"
+  appEngineProjectId = project.properties["appEngineProjectId"]
+}
+
+
+appengine {
+  stage {
+    artifact = "${buildDir}/libs/${project.name}-all.jar"
+    // artifact = "${buildDir}/native/nativeCompile/${project.name}"
+    extraFilesDirectories = "../static_files"
+  }
+  deploy {
+    projectId = appEngineProjectId
+    version = appEngineProjectVersion
+  }
+}
+
+processResources {
+//  if(!project.hasProperty("isLocal")) {
+//    exclude(["**/logback.xml"])
+//    rename("logback.gae.xml", "logback.xml")
+//  }
+}

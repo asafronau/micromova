@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package micromova.proto;
+
+option java_multiple_files = true;
+option java_package = "dev.safronau.micromova.proto";
+
+// Supported languages;
+enum Language {
+  UNKNOWN_LANGUAGE = 0;
+  RU = 1;
+  EN_US = 2;
+  DE = 3;
+  FR = 4;
+  PL = 5;
+  IT = 6;
+}

@@ -1,0 +1,19 @@
+.right {
+  float: right;
+}
+
+:host {
+  vertical-align: middle;
+  width: 100%;
+}
+
+.exam {
+  height: 48px;
+  width: 100%;
+}
+
+.add {
+  position: fixed;
+  bottom: 10%;
+  right: 10%;
+}

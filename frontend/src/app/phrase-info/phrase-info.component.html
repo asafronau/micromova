@@ -1,0 +1,13 @@
+<div class="component">
+  <button mat-button (click)="editPhrase()" class="phrase-text">
+    <span [ngClass]="{'todo-phrase': isTodoPhrase()}">{{ getText() }}</span>
+  </button>
+
+  <app-score-strength [starScoreMillis]="getStarScore()"></app-score-strength>
+
+  <button mat-icon-button color="warn"
+          (click)="deletePhrase()">
+    <mat-icon class="red">delete</mat-icon>
+  </button>
+
+</div>

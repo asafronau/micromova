@@ -1,0 +1,18 @@
+<configuration>
+  <!-- Uncomment the next line to enable ANSI color code interpretation -->
+  <!-- <property name="STDOUT_WITH_JANSI" value="true" /> -->
+  <!-- <include resource="io/micronaut/gcp/logging/logback-json-appender.xml" />
+  <root level="INFO">
+    <appender-ref ref="CONSOLE_JSON" />
+  </root> -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder>
+        <pattern>
+          %cyan([%d{ISO8601}]) %gray([%thread]) %highlight(%-5level) %magenta(%logger{12}) - %msg%n
+        </pattern>
+      </encoder>
+    </appender>
+    <root level="INFO">
+      <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

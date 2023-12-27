@@ -1,0 +1,30 @@
+:host {
+  flex: 1;
+}
+
+.component {
+  align-items: center;
+  display: flex;
+  height: 40px;
+  margin: 8px;
+}
+
+.phrase-text {
+  justify-content: left !important;
+}
+
+.phrase-text {
+  flex-grow: 1;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todo-phrase {
+  color: lightgray;
+}
+
+.exluded-phrase {
+  color: palegreen;
+}

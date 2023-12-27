@@ -1,0 +1,32 @@
+<div class="component">
+  <div class="editor">
+    <mat-form-field class="width100">
+      <input [(ngModel)]="name" matInput placeholder="Name of the dictionary">
+      <mat-hint>Must be unique</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field class="margin">
+      <mat-select placeholder="Dictionary language" [(value)]="srcLanguage">
+        @for (srcLang of srcLangs; track srcLang.value) {
+          <mat-option [value]="srcLang.value">
+          {{ srcLang.name }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="margin">
+      <mat-select placeholder="Translation language" [(value)]="dstLanguage">
+        <mat-option *ngFor="let dstLang of dstLangs" [value]="dstLang.value">
+          {{dstLang.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="centered">
+      <button mat-raised-button color="primary" class="save-btn"
+              [disabled]="!saveEnabled()" (click)="save()">Save
+      </button>
+    </div>
+  </div>
+</div>

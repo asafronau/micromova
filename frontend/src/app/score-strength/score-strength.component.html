@@ -1,0 +1,6 @@
+<div class="component" matTooltip={{getScore()}}>
+  <mat-icon [style.color]="getColor()" *ngFor="let _ of getFullStars()">star</mat-icon>
+  <mat-icon [style.color]="getColor()" *ngFor="let _ of getHalfStars()">star_half</mat-icon>
+  <mat-icon [style.color]="getColor()" *ngFor="let _ of getEmptyStars()">star_border</mat-icon>
+</div>
+

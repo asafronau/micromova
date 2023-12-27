@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  padding: 12px;
+}
+
+mat-form-field {
+  margin-top: 8px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.answer {
+  border-radius: 24px;
+  color: white;
+  padding: 16px
+}
+
+.answer-container {
+  height: 64px;
+}
+
+.component {
+  margin-left: 8px;
+}
+
+.correct-answer {
+  background-color: forestgreen;
+}
+
+.hidden-answer {
+  display: none;
+}
+.example-phrase {
+  font-size: 13px;
+  margin-left: 16px;
+}
+
+.say {
+  height: 64px;
+  width: 64px;
+}
+
+.title {
+  font-size: 1.2em;
+  margin-bottom: 16px;
+}
+
+.translatable span {
+  margin-left: 16px;
+}
+
+.wrong-answer {
+  background-color: red;
+}
+
+.words {
+  display: inline-block;
+  vertical-align: middle;
+}

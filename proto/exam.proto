@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package micromova.proto;
+
+option java_multiple_files = true;
+option java_package = "dev.safronau.micromova.proto";
+
+
+enum TestType {
+  UNKNOWN_TEST_TYPE = 0;
+  SELECT_TRANSLATION_SHOW_PHRASE = 1;
+  SELECT_TRANSLATION_HIDE_PHRASE = 2;
+  SPELL = 3;
+  TYPE_TRANSLATION_SHOW_PHRASE = 4;
+  TYPE_TRANSLATION_HIDE_PHRASE = 5;
+  TYPE_SOURCE = 6;
+}
+
+message SelectedOptions {
+  string translation = 1;
+  bool is_correct = 2;
+}
+
+message SelectTranslationTest {
+  int64 id = 1  [jstype = JS_STRING];
+  string phrase = 2;
+  bool is_phrase_hidden = 3;
+  repeated SelectedOptions options = 4;
+  int32 correct_score_user = 5;
+  int32 wrong_score_user = 6;
+  int32 correct_score_phrase = 7;
+  int32 wrong_score_phrase = 8;
+  bool is_new_phrase = 9;
+  string example = 10;
+  string mp3_url = 11;
+}
+
+message SpellTest {
+  int64 id = 1  [jstype = JS_STRING];
+  string phrase = 2;
+  int32 correct_score_user = 3;
+  int32 wrong_score_user = 4;
+  int32 correct_score_phrase = 5;
+  int32 wrong_score_phrase = 6;
+  string example = 7;
+  string translation = 8;
+  string mp3_url = 9;
+}
+
+message TypeTranslationTest {
+  int64 id = 1  [jstype = JS_STRING];
+  string phrase = 2;
+  repeated string correct_translations = 3;
+  bool is_phrase_hidden = 4;
+  int32 correct_score_user = 5;
+  int32 wrong_score_user = 6;
+  int32 correct_score_phrase = 7;
+  int32 wrong_score_phrase = 8;
+  string example = 9;
+  string mp3_url = 10;
+}
+
+message TypeSourceTest {
+  int64 id = 1  [jstype = JS_STRING];
+  string translation = 2;
+  repeated string correct_sources = 3;
+  int32 correct_score_user = 4;
+  int32 wrong_score_user = 5;
+  int32 correct_score_phrase = 6;
+  int32 wrong_score_phrase = 7;
+  string example = 8;
+  string mp3_url = 9;
+}
+
+message Exam {
+  repeated SelectTranslationTest select_translation_tests = 1;
+  repeated SpellTest spell_tests = 2;
+  repeated TypeTranslationTest type_translation_tests = 3;
+  repeated TypeSourceTest type_source_tests = 4;
+  repeated string source_phrases = 5;
+  repeated string translation_phrases = 6;
+  repeated int32 order = 7;
+}
+
+message TaskResult {
+  int64 id = 1  [jstype = JS_STRING];
+  int32 user_score = 2;
+  int32 phrase_score = 3;
+  bool is_correct_answer = 4;
+}

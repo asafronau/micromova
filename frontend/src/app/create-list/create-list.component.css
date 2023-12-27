@@ -1,0 +1,25 @@
+.component {
+  margin: 0 auto;
+  max-width: 560px;
+}
+
+.editor {
+  margin: 16px;
+}
+
+.width100 {
+  width: 100%;
+}
+
+.centered {
+  text-align: center;
+}
+
+.save-btn {
+  margin: 16px;
+}
+
+.margin {
+  margin-bottom: 16px;
+  margin-top: 16px;
+}

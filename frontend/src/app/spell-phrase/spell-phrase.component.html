@@ -1,0 +1,24 @@
+<div class="component">
+  <button mat-mini-fab color="accent" (click)="playSound()" class="say">
+    <mat-icon>volume_up</mat-icon>
+  </button>
+  <mat-form-field>
+    <mat-label>Enter the phrase</mat-label>
+    <textarea #textInput [(ngModel)]="answer" rows="3"
+              [disabled]="checkAnswer"
+              matInput placeholder=""
+              (keydown.enter)="onCheckClicked();false">
+    </textarea>
+  </mat-form-field>
+  <div class="example-phrase" [innerHTML]=" getExample()"></div>
+  <div class="answer-container">
+    <div *ngIf="checkAnswer" [ngClass]="getAnswerClass()" class="answer">
+      {{ getCorrectAnswer() }}: {{ getCorrectTranslation()}}
+    </div>
+  </div>
+  <app-exam-button [role]="getButtonRole()"
+                   [checkAnswerDisabled]="isCheckAnswerDisabled()"
+                   (checkClicked)="onCheckClicked()"
+                   (continueClicked)="onContinueClicked()">
+  </app-exam-button>
+</div>

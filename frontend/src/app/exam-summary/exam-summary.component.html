@@ -1,0 +1,16 @@
+<div>
+  <div [ngClass]="{'achievement': isGoodResult()}" class="score">
+    <span class="big">Score: {{ getScore() }}</span>
+    <div [hidden]="!isGoodResult()">
+      <span class="big">Great result!</span>
+    </div>
+    <div [hidden]="!isPerfectResult()">
+      <span class="big">Perfect score: +10% bonus!</span>
+    </div>
+    <div>
+      <button #replayBtn mat-mini-fab color="primary" class="replay" (click)="retryExam()"  [disabled]="isRetryDisabled()" autofocus>
+        <mat-icon>replay</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

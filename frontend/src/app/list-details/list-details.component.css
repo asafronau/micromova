@@ -1,0 +1,14 @@
+.add {
+  position: fixed;
+  bottom: 10%;
+  right: 10%;
+}
+
+.component {
+  margin: 0 auto;
+  max-width: 560px;
+}
+
+.discovery-control {
+  margin-bottom: 8px;
+}

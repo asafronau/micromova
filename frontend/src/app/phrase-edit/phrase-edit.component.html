@@ -1,0 +1,35 @@
+<div *ngIf="isComponentLoaded()" class="component">
+  <div class="editor">
+    <mat-form-field class="width100">
+      <mat-label>{{ getPhrasePlaceholder() }}</mat-label>
+      <input [(ngModel)]="phraseText" matInput placeholder="{{ getPhrasePlaceholder() }}" [disabled]="!isAdd">
+    </mat-form-field>
+
+    <mat-form-field class="width100">
+      <mat-label>Translations</mat-label>
+      <mat-chip-grid #chipList class="width100">
+        <mat-chip-row *ngFor="let translation of getTranslations()"
+                  [removable]="removable" (removed)="remove(translation)">
+          {{translation.getText() }}
+          <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+        </mat-chip-row>
+        <input placeholder="add a translation"
+               [matChipInputFor]="chipList"
+               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+               [matChipInputAddOnBlur]="addOnBlur"
+               (matChipInputTokenEnd)="add($event)">
+      </mat-chip-grid>
+      <mat-hint>Put more common first</mat-hint>
+    </mat-form-field>
+    <mat-form-field class="width100">
+      <input [(ngModel)]="example" #examInput matInput placeholder="Examples">
+    </mat-form-field>
+    <mat-checkbox [(ngModel)]="isDiscoverable">Available later</mat-checkbox>&nbsp;
+    <br>
+    <div class="centered">
+      <button mat-raised-button color="primary" class="save-btn"
+              [disabled]="!saveEnabled()" (click)="save()">Save
+      </button>
+    </div>
+  </div>
+</div>

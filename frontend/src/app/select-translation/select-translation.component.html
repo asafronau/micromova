@@ -1,0 +1,30 @@
+<div>
+  <div class="title">Select correct translation</div>
+
+  <div class="translatable">
+    <button mat-mini-fab color="accent" (click)="playSound()">
+      <mat-icon>volume_up</mat-icon>
+    </button>
+    <div class="words">
+      <span [ngClass]="getPhraseClass()">{{ getText() }}</span>
+      <div class="example-phrase" [innerHTML]=" getExample()"></div>
+    </div>
+  </div>
+
+  <mat-radio-group [(ngModel)]="answer" [disabled]="checkAnswer">
+    <div *ngFor="let translation of getTranslationOptions(); let i = index">
+      <span class="key-label">{{ i + 1 }}</span>
+      <mat-radio-button
+        [ngClass]="getAnswerClass(translation)"
+        [value]="translation.getTranslation()">
+        <span class="content-label">{{ translation.getTranslation() }}</span>
+      </mat-radio-button>
+    </div>
+  </mat-radio-group>
+
+  <app-exam-button [role]="getButtonRole()"
+                   [checkAnswerDisabled]="isCheckAnswerDisabled()"
+                   (checkClicked)="onCheckClicked()"
+                   (continueClicked)="onContinueClicked()">
+  </app-exam-button>
+</div>

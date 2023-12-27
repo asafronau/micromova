@@ -1,0 +1,29 @@
+[hidden] { display: none !important;}
+
+.achievement {
+  color: green !important;
+}
+
+.big {
+  font-size: 1.8em;
+}
+
+.congrats {
+  font-size: 1.2em;
+}
+
+.fit-image {
+  max-height: 100%;
+  max-width: 100%;
+  vertical-align: bottom;
+}
+
+.score {
+  color: saddlebrown;
+  margin-top: 32px;
+  text-align: center;
+}
+
+.tile-container {
+  margin-top: 16px;
+}

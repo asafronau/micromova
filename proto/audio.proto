@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package micromova.proto;
+
+option java_multiple_files = true;
+option java_package = "dev.safronau.micromova.proto";
+
+
+enum VoiceGender {
+  UNKNOWN_GENDER = 0;
+  FEMALE = 1;
+  MALE = 2;
+}
+
+enum Format {
+  UNKNOWN_FORMAT = 0;
+  MP3 = 1;
+}
+
+enum Type {
+  UNKNOWN_TYPE = 0;
+  GOOGLE_TEXT_TO_SPEECH = 1;
+}
+
+// Recording of a phrase.
+message Recording {
+  VoiceGender voice_gender = 1;
+  Format format = 2;
+  string uri = 3;
+  Type type = 4;
+}

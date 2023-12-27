@@ -1,0 +1,35 @@
+/* You can add global styles to this file, and also import other style files */
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: #fafafa !important;
+}
+
+.mdc-text-field {
+  padding: 0 !important;
+}
+
+.mat-mdc-radio-button .mdc-form-field {
+  font-size: 16px;
+}
+
+.mdc-button {
+  font-family: Roboto,Helvetica Neue,sans-serif;
+  letter-spacing: normal;
+}
+
+.mat-mdc-form-field-hint-wrapper {
+  padding: 0 !important;
+}
+
+.mat-mdc-checkbox label {
+  font-size: 16px;
+}
+
+html {
+  --mdc-radio-state-layer-size: 24px;
+  --mat-form-field-hover-state-layer-opacity: 0;
+  --mat-form-field-focus-state-layer-opacity: 0;
+  --mat-form-field-container-text-font: Roboto,Helvetica Neue,sans-serif;
+}

@@ -1,0 +1,5 @@
+mova:
+  max_tasks: 40
+  google_project_id: "fake-project-id"
+  storage_bucket: "fake-storage-bucket"
+  domain:  "localhost"

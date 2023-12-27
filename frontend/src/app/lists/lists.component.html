@@ -1,0 +1,19 @@
+<div *ngIf="isComponentLoaded()">
+
+  <mat-list>
+    <mat-list-item *ngFor="let name of getNames()">
+      <div style="display: flex; justify-content: space-between;">
+      <button mat-button (click)="goToExam(name)" class="exam">
+        {{ name }}
+      </button>
+      <button mat-icon-button color="warn" class="right"
+              (click)="goToCollectionDetails(name)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      </div>
+    </mat-list-item>
+  </mat-list>
+  <button mat-fab class="add" (click)="addCollection()">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

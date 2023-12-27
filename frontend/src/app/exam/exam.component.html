@@ -1,0 +1,54 @@
+<div class="component" *ngIf="isComponentReady()">
+  <div>
+    <app-discover-points></app-discover-points>
+    <div class="recent">
+      Recent:
+      <app-score-strength [starScoreMillis]="getRecentScore()"></app-score-strength>
+      ({{ getTotalCount() }} / {{ getTODO() }})
+    </div>
+    <div class="score" matTooltip={{getUniqueStats()}}>
+      <span class="score">{{ getScore() }} points ({{ getUnique() }} phrases today)</span>
+    </div>
+  </div>
+  <mat-progress-bar mode="determinate" value="{{ getProgress() }}"></mat-progress-bar>
+
+  <div [ngSwitch]="getTaskType()">
+    <app-select-translation
+      *ngSwitchCase="getSelectTranslationType()"
+      (continueClicked)="onContinueClicked()"
+      [cachedAudio]="getAudio()"
+      [task]="getTask()">
+    </app-select-translation>
+    <app-spell-phrase
+      *ngSwitchCase="getSpellType()"
+      (continueClicked)="onContinueClicked()"
+      [cachedAudio]="getAudio()"
+      [task]="getTask()">
+    </app-spell-phrase>
+
+    <app-select-answer
+      *ngSwitchCase="getTypeTranslationType()"
+      (continueClicked)="onContinueClicked()"
+      [cachedAudio]="getAudio()"
+      [translatable]="getTranslatable()"
+      [allOptions]="getAllTranslations()"
+      [correctOptions]="getCorrectTranslations()"
+      [task]="getTask()">
+    </app-select-answer>
+
+    <app-select-answer
+      *ngSwitchCase="getTypeSourceType()"
+      (continueClicked)="onContinueClicked()"
+      [cachedAudio]="getAudio()"
+      [translatable]="getTranslatable()"
+      [allOptions]="getAllSources()"
+      [correctOptions]="getCorrectSources()"
+      [task]="getTask()">
+    </app-select-answer>
+  </div>
+</div>
+<div
+  *ngIf="!isComponentReady()"
+  style="display: flex; justify-content: center; align-items: center; height: 100%">
+  <mat-spinner></mat-spinner>
+</div>

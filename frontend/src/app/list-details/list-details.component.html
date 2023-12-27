@@ -1,0 +1,35 @@
+<div *ngIf="isComponentReady()" class="component">
+  <mat-list>
+    @for (phrase of getPhrases(); track phrase.getId()) {
+      <mat-list-item>
+        <app-phrase-info [phrase]="phrase" [listName]="getCollectionName()"
+                         (phraseDeleted)="deletePhrase(phrase)">
+        </app-phrase-info>
+      </mat-list-item>
+    }
+
+    <button mat-fab class="add" (click)="addPhrase()">
+      <mat-icon>add</mat-icon>
+    </button>
+  </mat-list>
+
+  <mat-divider></mat-divider>
+
+  <div style="margin: 32px">
+    <mat-checkbox class="discovery-control"
+                  [(ngModel)]="usePhraseDiscovery">
+      Use phrase discovery
+    </mat-checkbox>
+    <div>
+      <mat-form-field matTooltip={{getCurrentPoints()}}>
+        <input [(ngModel)]="discoverPoints" matInput type="number"
+               placeholder="Discover points" value="0">
+      </mat-form-field>
+    </div>
+    <button mat-raised-button class="save-btn"
+            (click)="saveDiscoverPoints()">Update discovery
+    </button>
+
+  </div>
+
+</div>
