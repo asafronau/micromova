@@ -39,7 +39,8 @@ export class ExamComponent  {
   constructor(route: ActivatedRoute, private router: Router, private backend: BackendService, private examService: CurrentExamService) {
     route.params.subscribe(params => {
       this.collectionName = params['name'];
-      if (this.examService.exam == null || this.examService.taskResults.length !== 0) {
+      if (this.examService.exam == null || this.examService.taskResults.length !== 0 ||
+            this.examService.collectionName != this.collectionName) {
         examService.generateExam(this.collectionName).subscribe(unused => {
           this.copyExam();
         });
@@ -60,6 +61,7 @@ export class ExamComponent  {
     this.totalUndiscovered = this.examService.totalUndiscovered;
     this.uniqueToday = this.examService.uniqueToday;
     this.uniqueWeek = this.examService.uniqueWeek;
+    this.collectionName = this.examService.collectionName;
     for (let i = 0; i < this.exam.getOrderList().length; i++) {
       this.tasks.push(this.getTaskByIndex(i));
       this.audioEls.push(this.makeAudioEl(i));

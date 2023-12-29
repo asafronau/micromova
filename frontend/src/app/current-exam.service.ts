@@ -10,6 +10,7 @@ import {GenerateExamResponse} from '../proto/requests_pb';
 })
 export class CurrentExamService {
 
+  collectionName: string = "";
   exam!: Exam;
   todayScore!: number;
   todayDiscovered!: number;
@@ -25,6 +26,7 @@ export class CurrentExamService {
 
   generateExam(collectionName: string): Observable<void> {
     return this.backend.generateExam(collectionName, Intl.DateTimeFormat().resolvedOptions().timeZone).pipe(tap(response => {
+      this.collectionName = collectionName;
       this.applyResponse(response);
     }), map(result => undefined));
   }
