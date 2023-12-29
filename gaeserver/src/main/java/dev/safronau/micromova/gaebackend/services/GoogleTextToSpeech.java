@@ -35,7 +35,17 @@ public class GoogleTextToSpeech implements TextToSpeech {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private static final ImmutableMap<Language, String> LANGUAGE_TO_NAME =
-      ImmutableMap.of(Language.EN_US, "en-US", Language.DE, "de");
+      ImmutableMap.of(
+          Language.EN_US,
+          "en-US",
+          Language.DE,
+          "de",
+          Language.FR,
+          "fr",
+          Language.PL,
+          "pl",
+          Language.IT,
+          "it");
 
   private static final ImmutableMap<VoiceGender, String> VOICE_GENDER_TO_SSML =
       ImmutableMap.of(VoiceGender.FEMALE, "FEMALE", VoiceGender.MALE, "MALE");

@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {Router} from "@angular/router";
-import {Language} from "../../proto/language_pb";
+import {Language, LanguageMap} from "../../proto/language_pb";
 import {MatInputModule} from "@angular/material/input";
 import {MatSelectModule} from "@angular/material/select";
 import {FormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
+import {BackendService} from "../backend.service";
 
 @Component({
   selector: 'app-create-list',
@@ -17,8 +18,8 @@ import {MatButtonModule} from "@angular/material/button";
 export class CreateListComponent {
   name!: string;
 
-  srcLanguage!: number;
-  dstLanguage: number = Language.RU;
+  srcLanguage!: LanguageMap[keyof LanguageMap];
+  dstLanguage: LanguageMap[keyof LanguageMap] = Language.RU;
 
   srcLangs = [
     {name: 'English', value: Language.EN_US},
@@ -32,9 +33,13 @@ export class CreateListComponent {
     {name: 'English', value: Language.EN_US},
   ];
 
-  constructor( private router: Router) { }
+  constructor( private router: Router, private backend: BackendService) { }
 
   save(): void {
+    this.backend.createCollection(this.name.trim(), this.srcLanguage, this.dstLanguage)
+    .subscribe(unused => {
+      this.router.navigateByUrl('/lists');
+    });
   }
 
   saveEnabled(): boolean {
