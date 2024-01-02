@@ -76,7 +76,10 @@ export class PhraseTestComponent implements OnInit {
       result.setUserScore(this.phraseTask.getWrongScoreUser());
     }
     this.currentExamService.todayScore += result.getUserScore();
-    this.currentExamService.taskResults.push(result);
+    const results = this.currentExamService.taskResults;
+    if (results.length == 0 || results[results.length - 1].getId() != result.getId()) {
+      this.currentExamService.taskResults.push(result);
+    }
   }
 
   playSound(): void {
