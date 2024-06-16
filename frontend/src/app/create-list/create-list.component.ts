@@ -27,6 +27,7 @@ export class CreateListComponent {
     {name: 'French', value: Language.FR},
     {name: 'Polish', value: Language.PL},
     {name: 'Italian', value: Language.IT},
+    {name: 'Dutch', value: Language.NL},
   ];
   dstLangs = [
     {name: 'Русский', value: Language.RU},

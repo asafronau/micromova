@@ -45,7 +45,9 @@ public class GoogleTextToSpeech implements TextToSpeech {
           Language.PL,
           "pl",
           Language.IT,
-          "it");
+          "it",
+          Language.NL,
+          "nl");
 
   private static final ImmutableMap<VoiceGender, String> VOICE_GENDER_TO_SSML =
       ImmutableMap.of(VoiceGender.FEMALE, "FEMALE", VoiceGender.MALE, "MALE");
@@ -62,6 +64,8 @@ public class GoogleTextToSpeech implements TextToSpeech {
           .put(Language.PL, VoiceGender.MALE, "pl-PL-Wavenet-B")
           .put(Language.IT, VoiceGender.FEMALE, "it-IT-Wavenet-A")
           .put(Language.IT, VoiceGender.MALE, "it-IT-Wavenet-D")
+          .put(Language.NL, VoiceGender.FEMALE, "nl-NL-Wavenet-D")
+          .put(Language.NL, VoiceGender.MALE, "it-IT-Wavenet-B")
           .build();
 
   @Inject
