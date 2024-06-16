@@ -65,7 +65,7 @@ public class GoogleTextToSpeech implements TextToSpeech {
           .put(Language.IT, VoiceGender.FEMALE, "it-IT-Wavenet-A")
           .put(Language.IT, VoiceGender.MALE, "it-IT-Wavenet-D")
           .put(Language.NL, VoiceGender.FEMALE, "nl-NL-Wavenet-D")
-          .put(Language.NL, VoiceGender.MALE, "it-IT-Wavenet-B")
+          .put(Language.NL, VoiceGender.MALE, "nl-NL-Wavenet-B")
           .build();
 
   @Inject
