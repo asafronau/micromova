@@ -16,6 +16,7 @@ import dev.safronau.micromova.proto.LoadCollectionResponse;
 import dev.safronau.micromova.proto.LoadCollectionsResponse;
 import dev.safronau.micromova.proto.Phrase;
 import dev.safronau.micromova.proto.Translation;
+import dev.safronau.micromova.proto.UpdateAudioInCollectionResponse;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -31,8 +32,9 @@ public final class CliTest {
     //createTestCollection();
     //loadTestCollections();
     //loadTestCollection();
-    for (int i = 0; i < 10; i++) generateExam();
+    // for (int i = 0; i < 10; i++) generateExam();
     // addPhrase();
+    migrate();
   }
 
   private static long getPhraseKey(String text) {
@@ -95,6 +97,26 @@ public final class CliTest {
             .thenApply(HttpResponse::body)
             .thenApply(
                 (response) -> parseProto(response, GenerateExamResponse.getDefaultInstance()))
+            .join());
+  }
+
+  private static void migrate() {
+    LoadCollectionRequest req = LoadCollectionRequest.newBuilder().setName("andrei test 1").build();
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request =
+        HttpRequest.newBuilder()
+            .uri(URI.create("http://localhost:8080/api/collection/audioupdate"))
+            .header("Content-Type", "application/x-protobuf")
+            .header("Cookie", COOKIE)
+            .POST(BodyPublishers.ofByteArray(req.toByteArray()))
+            .build();
+    System.out.println(
+        client
+            .sendAsync(request, BodyHandlers.ofByteArray())
+            .thenApply(HttpResponse::body)
+            .thenApply(
+                (response) ->
+                    parseProto(response, UpdateAudioInCollectionResponse.getDefaultInstance()))
             .join());
   }
 

@@ -27,8 +27,10 @@ public class ExamResponseBuilder {
   @ReflectiveAccess
   private String storageBucket;
 
-  public GenerateExamResponse build(Collection collection, Clock clock, String timezone) {
-    Exam exam = ExamGenerator.generate(collection, clock.instant(), maxTasks, storageBucket);
+  public GenerateExamResponse build(
+      Collection collection, Clock clock, String timezone, boolean isOggCapable) {
+    Exam exam =
+        ExamGenerator.generate(collection, clock.instant(), maxTasks, storageBucket, isOggCapable);
     LocalDate localDate = LocalDate.now(clock.withZone(ZoneId.of(timezone)));
     ZonedDateTime todayTime = localDate.atStartOfDay(ZoneId.of(timezone));
     ZonedDateTime weekTime = todayTime.minusDays(6);

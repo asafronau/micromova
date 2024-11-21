@@ -57,13 +57,19 @@ public class GoogleStorage {
     return updatedCollection;
   }
 
-  public String writeMp3AudioFile(
-      ByteString audio, Language language, VoiceGender voiceGender, String text) {
+  public String writeAudioFile(
+      ByteString audio, Language language, VoiceGender voiceGender, String text, String encoding) {
+    MediaType type =
+        switch (encoding) {
+          case Constants.MP3_64_ENCODING -> MediaType.MPEG_AUDIO;
+          case Constants.OGG_ENCODING -> MediaType.OGG_AUDIO;
+          default -> throw new IllegalArgumentException("invalid encoding " + encoding);
+        };
     String fileName =
         storage.write(
             audio.toByteArray(),
-            buildAudioPath(language, voiceGender, text),
-            MediaType.MPEG_AUDIO,
+            buildAudioPath(language, voiceGender, text, encoding),
+            type,
             /* isPublic= */ true);
     logger.atInfo().log("Wrote an audio file: %s", fileName);
     return fileName;
@@ -77,10 +83,17 @@ public class GoogleStorage {
         .collect(ImmutableList.toImmutableList());
   }
 
-  private static String buildAudioPath(Language language, VoiceGender voiceGender, String text) {
+  private static String buildAudioPath(
+      Language language, VoiceGender voiceGender, String text, String encoding) {
     String encodedText = BASE64_ENCODER.encodeToString(text.getBytes(UTF_8));
+    String ext =
+        switch (encoding) {
+          case Constants.MP3_64_ENCODING -> "mp3";
+          case Constants.OGG_ENCODING -> "ogg";
+          default -> throw new IllegalArgumentException("invalid encoding " + encoding);
+        };
     return String.format(
-        "%s/%s/%s/%s.mp3",
-        AUDIO_DIRECTORY, language.getNumber(), voiceGender.getNumber(), encodedText);
+        "%s/%s/%s/%s.%s",
+        AUDIO_DIRECTORY, language.getNumber(), voiceGender.getNumber(), encodedText, ext);
   }
 }

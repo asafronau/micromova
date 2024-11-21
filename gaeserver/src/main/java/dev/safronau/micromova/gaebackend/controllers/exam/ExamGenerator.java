@@ -34,7 +34,11 @@ public final class ExamGenerator {
   private static final Duration ONE_DAY = Duration.ofDays(1);
 
   public static Exam generate(
-      Collection collection, Instant now, int maxTasks, String storageBucket) {
+      Collection collection,
+      Instant now,
+      int maxTasks,
+      String storageBucket,
+      boolean isOggCapable) {
     long nowSeconds = now.getEpochSecond();
     ImmutableList<Phrase> selectedPhrases =
         getSelectablePhrases(collection).stream()
@@ -69,15 +73,21 @@ public final class ExamGenerator {
     for (int i = 0; i < numTasks; i++) {
       Phrase phrase = selectedPhrases.get(i);
       switch (getTestType(phrase)) {
-        case SELECT_TRANSLATION_SHOW_PHRASE -> builder.addSelectTranslationTests(
-            getSelectTranslationTest(phrase, true, selectedPhrases, storageBucket));
-        case SELECT_TRANSLATION_HIDE_PHRASE -> builder.addSelectTranslationTests(
-            getSelectTranslationTest(phrase, false, selectedPhrases, storageBucket));
-        case SPELL -> builder.addSpellTests(getSpellTest(phrase, storageBucket));
-        case TYPE_TRANSLATION_SHOW_PHRASE -> builder.addTypeTranslationTests(
-            getTypeTranslationTest(phrase, true, storageBucket));
-        case TYPE_TRANSLATION_HIDE_PHRASE -> builder.addTypeTranslationTests(
-            getTypeTranslationTest(phrase, false, storageBucket));
+        case SELECT_TRANSLATION_SHOW_PHRASE ->
+            builder.addSelectTranslationTests(
+                getSelectTranslationTest(
+                    phrase, true, selectedPhrases, storageBucket, isOggCapable));
+        case SELECT_TRANSLATION_HIDE_PHRASE ->
+            builder.addSelectTranslationTests(
+                getSelectTranslationTest(
+                    phrase, false, selectedPhrases, storageBucket, isOggCapable));
+        case SPELL -> builder.addSpellTests(getSpellTest(phrase, storageBucket, isOggCapable));
+        case TYPE_TRANSLATION_SHOW_PHRASE ->
+            builder.addTypeTranslationTests(
+                getTypeTranslationTest(phrase, true, storageBucket, isOggCapable));
+        case TYPE_TRANSLATION_HIDE_PHRASE ->
+            builder.addTypeTranslationTests(
+                getTypeTranslationTest(phrase, false, storageBucket, isOggCapable));
         case TYPE_SOURCE -> builder.addTypeSourceTests(getTypeSourceTest(phrase, selectedPhrases));
         default -> throw new IllegalStateException("unreachable");
       }
@@ -159,7 +169,7 @@ public final class ExamGenerator {
   }
 
   private static TypeTranslationTest getTypeTranslationTest(
-      Phrase phrase, boolean isShow, String storageBucket) {
+      Phrase phrase, boolean isShow, String storageBucket, boolean isOggCapable) {
     int userScore = (int) (0.8 * CORRECT_ANSWER_SCORE + rand() * CORRECT_ANSWER_SCORE / 5);
     int taskPoints = isShow ? 15 : 20;
     return TypeTranslationTest.newBuilder()
@@ -172,7 +182,7 @@ public final class ExamGenerator {
         .setCorrectScorePhrase(Math.min(userScore + phrase.getScore(), MAX_PHRASE_SCORE))
         .setWrongScorePhrase((int) (phrase.getScore() / 1.25))
         .setExample(phrase.getExample())
-        .setMp3Url(getMp3Url(phrase, storageBucket))
+        .setMp3Url(getAudioUrl(phrase, storageBucket, isOggCapable))
         .build();
   }
 
@@ -182,7 +192,7 @@ public final class ExamGenerator {
     return copy;
   }
 
-  private static SpellTest getSpellTest(Phrase phrase, String storageBucket) {
+  private static SpellTest getSpellTest(Phrase phrase, String storageBucket, boolean isOggCapable) {
     int userScore = (int) (0.8 * CORRECT_ANSWER_SCORE + rand() * CORRECT_ANSWER_SCORE / 5);
     List<String> translations = getTranslationStrings(phrase);
     return SpellTest.newBuilder()
@@ -194,12 +204,16 @@ public final class ExamGenerator {
         .setWrongScorePhrase((int) (phrase.getScore() / 1.25))
         .setExample(phrase.getExample())
         .setTranslation(translations.get(ThreadLocalRandom.current().nextInt(translations.size())))
-        .setMp3Url(getMp3Url(phrase, storageBucket))
+        .setMp3Url(getAudioUrl(phrase, storageBucket, isOggCapable))
         .build();
   }
 
   private static SelectTranslationTest getSelectTranslationTest(
-      Phrase phrase, boolean isShow, ImmutableList<Phrase> phrases, String storageBucket) {
+      Phrase phrase,
+      boolean isShow,
+      ImmutableList<Phrase> phrases,
+      String storageBucket,
+      boolean isOggCapable) {
     String correctTranslation = selectCorrectOption(phrase);
     ImmutableSet<String> correctOptions = ImmutableSet.copyOf(getTranslationStrings(phrase));
     Map<String, Boolean> options = new HashMap<>(Map.of(correctTranslation, true));
@@ -231,7 +245,7 @@ public final class ExamGenerator {
         .setCorrectScorePhrase(Math.min(userScore + phrase.getScore(), MAX_PHRASE_SCORE))
         .setWrongScorePhrase((int) (phrase.getScore() / 1.25))
         .setExample(phrase.getExample())
-        .setMp3Url(getMp3Url(phrase, storageBucket))
+        .setMp3Url(getAudioUrl(phrase, storageBucket, isOggCapable))
         .build();
   }
 
@@ -270,10 +284,17 @@ public final class ExamGenerator {
         .collect(ImmutableList.toImmutableList());
   }
 
-  private static String getMp3Url(Phrase phrase, String storageBucket) {
+  private static String getAudioUrl(Phrase phrase, String storageBucket, boolean isOggCapable) {
+    Format format =
+        (isOggCapable
+                && phrase.getRecordingList().stream()
+                    .map(Recording::getFormat)
+                    .anyMatch(e -> e.equals(Format.OGG)))
+            ? Format.OGG
+            : Format.MP3;
     List<String> urls =
         phrase.getRecordingList().stream()
-            .filter(recording -> recording.getFormat().equals(Format.MP3))
+            .filter(recording -> recording.getFormat().equals(format))
             .map(Recording::getUri)
             .toList();
     return storageBucket + "/" + urls.get(ThreadLocalRandom.current().nextInt(urls.size()));

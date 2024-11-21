@@ -54,6 +54,7 @@ public class GenerateExamTest extends CommonControllerTest {
       GenerateExamRequest.newBuilder()
           .setCollectionName(COLLECTION_NAME)
           .setTimezone("America/Los_Angeles")
+          .setIsOggCapable(true)
           .build();
 
   @Inject Clock mockClock;

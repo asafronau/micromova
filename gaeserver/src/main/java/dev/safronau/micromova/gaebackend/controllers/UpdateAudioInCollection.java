@@ -1,41 +1,44 @@
 package dev.safronau.micromova.gaebackend.controllers;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import dev.safronau.micromova.gaebackend.auth.Annotations.CurrentUserId;
-import dev.safronau.micromova.gaebackend.converters.Converters;
 import dev.safronau.micromova.gaebackend.services.Constants;
 import dev.safronau.micromova.gaebackend.services.GoogleDatastore;
 import dev.safronau.micromova.gaebackend.services.GoogleStorage;
 import dev.safronau.micromova.gaebackend.services.TextToSpeech;
-import dev.safronau.micromova.proto.AddPhraseRequest;
-import dev.safronau.micromova.proto.AddPhraseResponse;
 import dev.safronau.micromova.proto.Collection;
 import dev.safronau.micromova.proto.Format;
-import dev.safronau.micromova.proto.Language;
 import dev.safronau.micromova.proto.Phrase;
 import dev.safronau.micromova.proto.Recording;
 import dev.safronau.micromova.proto.Type;
+import dev.safronau.micromova.proto.UpdateAudioInCollectionRequest;
+import dev.safronau.micromova.proto.UpdateAudioInCollectionResponse;
 import dev.safronau.micromova.proto.VoiceGender;
-import dev.safronau.micromova.proto.VoiceType;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.http.exceptions.HttpStatusException;
 import io.micronaut.protobuf.codec.ProtobufferCodec;
 import io.micronaut.runtime.http.scope.RequestScope;
 import jakarta.inject.Inject;
+import java.time.Duration;
+import java.time.temporal.TemporalUnit;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 @RequestScope
-@Controller("/api/collection/addphrase")
-public class AddPhrase {
+@Controller("/api/collection/audioupdate")
+public class UpdateAudioInCollection {
 
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -45,9 +48,9 @@ public class AddPhrase {
   private final String userId;
 
   @Inject
-  AddPhrase(
-      GoogleStorage googleStorage,
+  UpdateAudioInCollection(
       GoogleDatastore googleDatastore,
+      GoogleStorage googleStorage,
       TextToSpeech textToSpeech,
       @CurrentUserId String userId) {
     this.googleDatastore = googleDatastore;
@@ -57,69 +60,63 @@ public class AddPhrase {
   }
 
   @Post(consumes = ProtobufferCodec.PROTOBUFFER_ENCODED, produces = MediaType.TEXT_PLAIN)
-  Mono<byte[]> execute(@Body AddPhraseRequest request) {
-    Preconditions.checkArgument(
-        !request.getPhrase().getTranslationList().isEmpty(), "missing translations");
-    Map<VoiceGender, String> overrides = ImmutableMap.of();
-    if (request.getVoiceType().equals(VoiceType.JOURNEY)) {
-      Language language = request.getPhrase().getSourceLanguage();
-      overrides =
-          ImmutableMap.of(
-              VoiceGender.FEMALE,
-              Objects.requireNonNull(
-                  Constants.JOURNEY_VOICE_NAME.get(language, VoiceGender.FEMALE)),
-              VoiceGender.MALE,
-              Objects.requireNonNull(Constants.JOURNEY_VOICE_NAME.get(language, VoiceGender.MALE)));
+  Mono<byte[]> execute(@Body UpdateAudioInCollectionRequest request) {
+    Collection collection =
+        googleStorage.readCollectionFile(/* userId= */ userId, /* name= */ request.getName());
+    if (collection.equals(Collection.getDefaultInstance())) {
+      throw new HttpStatusException(HttpStatus.BAD_REQUEST, "collection is missing");
     }
-    return Mono.zip(
-            getOrCreatePhrase(request.getPhrase(), overrides),
-            readCollection(request.getCollectionName()),
-            ((phrase, collection) -> {
-              logger.atInfo().log("Got both phrase and collection.");
-              Collection.Builder builder = collection.toBuilder();
-              Optional<Phrase.Builder> pb =
-                  builder.getPhraseBuilderList().stream()
-                      .filter(p -> p.getId() == phrase.getId())
-                      .findFirst();
-              if (pb.isPresent()) {
-                logger.atInfo().log(
-                    "Phrase %s is present in the collection %s.",
-                    phrase.getId(), collection.getName());
-                pb.get()
-                    .setExample(phrase.getExample())
-                    .clearTranslation()
-                    .addAllTranslation(phrase.getTranslationList())
-                    .clearRecording()
-                    .addAllRecording(phrase.getRecordingList())
-                    .setIsDiscoverable(phrase.getIsDiscoverable());
-              } else {
-                builder.addPhrase(phrase);
-              }
-              return AddPhraseResponse.newBuilder()
-                  .setCollection(
-                      Converters.from(googleStorage.writeCollectionFile(builder.build())))
-                  .build()
-                  .toByteArray();
-            }))
-        .subscribeOn(Schedulers.parallel());
+    Collection.Builder builder = collection.toBuilder();
+    var updatesPhrases =
+        collection.getPhraseList().stream()
+            /*.filter(
+                phrase ->
+                    !phrase.getRecordingList().stream()
+                        .map(Recording::getFormat)
+                        .collect(Collectors.toUnmodifiableSet())
+                        .contains(Format.OGG))*/
+            .map(this::getOrCreatePhrase)
+            .toList();
+    return
+        Mono.zip(
+                updatesPhrases,
+                (Object[] responses) -> {
+                  for (var e : responses) {
+                    Phrase pp = (Phrase) e;
+                    Optional<Phrase.Builder> pb =
+                        builder.getPhraseBuilderList().stream()
+                            .filter(p -> p.getId() == pp.getId())
+                            .findFirst();
+                    pb.get()
+                        .setExample(pp.getExample())
+                        .clearTranslation()
+                        .addAllTranslation(pp.getTranslationList())
+                        .clearRecording()
+                        .addAllRecording(pp.getRecordingList())
+                        .setIsDiscoverable(pp.getIsDiscoverable());
+                  }
+                  return builder.build();
+                })
+            .subscribeOn(Schedulers.single()).map(e -> {
+              googleStorage.writeCollectionFile(e);
+              return UpdateAudioInCollectionResponse.getDefaultInstance().toByteArray();
+            });
+
+    // System.out.println(col);
+    // googleStorage.writeCollectionFile(builder.build());
   }
 
-  private Mono<Phrase> getOrCreatePhrase(Phrase phrase, Map<VoiceGender, String> overrides) {
-    return createPhrase(phrase, overrides).subscribeOn(Schedulers.parallel());
+  private Mono<Phrase> getOrCreatePhrase(Phrase phrase) {
+    return buildAndStorePhrase(phrase).single();
   }
 
-  private Mono<Phrase> createPhrase(Phrase phrase, Map<VoiceGender, String> overrides) {
-    logger.atInfo().log("Creating a phrase %s", phrase);
+  private Mono<Phrase> buildAndStorePhrase(Phrase phrase) {
     return Mono.zip(
             ImmutableList.of(
-                synthesizeSpeechForGender(
-                    phrase, VoiceGender.FEMALE, Constants.MP3_64_ENCODING, Map.of()),
-                synthesizeSpeechForGender(
-                    phrase, VoiceGender.MALE, Constants.MP3_64_ENCODING, Map.of()),
-                synthesizeSpeechForGender(
-                    phrase, VoiceGender.FEMALE, Constants.OGG_ENCODING, overrides),
-                synthesizeSpeechForGender(
-                    phrase, VoiceGender.MALE, Constants.OGG_ENCODING, overrides)),
+                synthesizeSpeechForGender(phrase, VoiceGender.FEMALE, Constants.MP3_64_ENCODING),
+                synthesizeSpeechForGender(phrase, VoiceGender.MALE, Constants.MP3_64_ENCODING),
+                synthesizeSpeechForGender(phrase, VoiceGender.FEMALE, Constants.OGG_ENCODING),
+                synthesizeSpeechForGender(phrase, VoiceGender.MALE, Constants.OGG_ENCODING)),
             (responses) ->
                 produceResponse(
                     phrase,
@@ -175,7 +172,7 @@ public class AddPhrase {
   }
 
   private Mono<String> synthesizeSpeechForGender(
-      Phrase phrase, VoiceGender voiceGender, String encoding, Map<VoiceGender, String> overrides) {
+      Phrase phrase, VoiceGender voiceGender, String encoding) {
     return Mono.fromCallable(
             () ->
                 textToSpeech.synthesizeSpeech(
@@ -183,7 +180,7 @@ public class AddPhrase {
                     phrase.getSourceLanguage(),
                     voiceGender,
                     encoding,
-                    overrides))
+                    Map.of()))
         .map(
             bytes ->
                 googleStorage.writeAudioFile(
@@ -192,14 +189,6 @@ public class AddPhrase {
                     voiceGender,
                     phrase.getNormalizedText(),
                     encoding))
-        .subscribeOn(Schedulers.parallel());
+        .single();
   }
-
-  private Mono<Collection> readCollection(String name) {
-    return Mono.just(googleStorage.readCollectionFile(/* userId= */ userId, /* name= */ name));
-  }
-
-  /* private static String cleanText(String text) {
-    return text.trim().replaceAll("\\s+", " ");
-  } */
 }

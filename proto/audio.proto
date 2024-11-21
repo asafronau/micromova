@@ -15,11 +15,18 @@ enum VoiceGender {
 enum Format {
   UNKNOWN_FORMAT = 0;
   MP3 = 1;
+  OGG = 2;
 }
 
 enum Type {
   UNKNOWN_TYPE = 0;
   GOOGLE_TEXT_TO_SPEECH = 1;
+}
+
+enum VoiceType {
+  UNKNOWN_VOICE_TYPE = 0;
+  DEFAULT = 1;
+  JOURNEY = 2;
 }
 
 // Recording of a phrase.

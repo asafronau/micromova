@@ -15,6 +15,7 @@ import {CurrentCollectionService} from './current-collection.service';
 import {CollectionView, Phrase} from '../proto/phrase_pb';
 import {Language, LanguageMap} from '../proto/language_pb';
 import {TaskResult} from '../proto/exam_pb';
+import {VoiceType} from "../proto/audio_pb";
 
 
 @Injectable({
@@ -31,6 +32,10 @@ export class BackendService {
   };
 
   constructor(private http: HttpClient, private collectionService: CurrentCollectionService) {}
+
+  isIOS(): boolean {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  }
 
   loadCollections(): Observable<LoadCollectionsResponse> {
     return this.http.post('/api/collection/loadall', '',
@@ -75,10 +80,13 @@ export class BackendService {
       tap(response => this.collectionService.update(<CollectionView>response.getCollection())));
   }
 
-  addPhrase(collectionName: string, phrase: Phrase): Observable<AddPhraseResponse> {
+  addPhrase(collectionName: string, phrase: Phrase, isJourney: boolean): Observable<AddPhraseResponse> {
     const req = new AddPhraseRequest();
     req.setCollectionName(collectionName);
     req.setPhrase(phrase);
+    if (isJourney) {
+      req.setVoiceType(VoiceType.JOURNEY);
+    }
     return this.http.post('/api/collection/addphrase', req.serializeBinary().buffer,
       BackendService.DEFAULT_REQUEST_OPTIONS).pipe(
       map((data) => AddPhraseResponse.deserializeBinary(new Uint8Array(data))),
@@ -114,6 +122,7 @@ export class BackendService {
     const req = new GenerateExamRequest();
     req.setCollectionName(collectionName);
     req.setTimezone(timezone);
+    req.setIsOggCapable(!this.isIOS());
     return this.http.post('/api/exam/generate', req.serializeBinary().buffer,
       BackendService.DEFAULT_REQUEST_OPTIONS).pipe(
       map((data) => GenerateExamResponse.deserializeBinary(new Uint8Array(data))));
@@ -124,6 +133,7 @@ export class BackendService {
     req.setCollectionName(collectionName);
     req.setTimezone(timezone);
     req.setTaskResultsList(results);
+    req.setIsOggCapable(!this.isIOS());
     return this.http.post('/api/exam/apply', req.serializeBinary().buffer,
       BackendService.DEFAULT_REQUEST_OPTIONS).pipe(
       map((data) => GenerateExamResponse.deserializeBinary(new Uint8Array(data))),

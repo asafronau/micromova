@@ -89,6 +89,8 @@ public class ApplyExam {
       }
     }
     Collection collection = googleStorage.writeCollectionFile(collectionBuilder.build());
-    return examResponseBuilder.build(collection, clock, request.getTimezone()).toByteArray();
+    return examResponseBuilder
+        .build(collection, clock, request.getTimezone(), request.getIsOggCapable())
+        .toByteArray();
   }
 }

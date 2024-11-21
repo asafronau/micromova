@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package micromova.proto;
 
+import "audio.proto";
 import "exam.proto";
 import "language.proto";
 import "phrase.proto";
@@ -28,6 +29,7 @@ message GenerateExamRequest {
   string collection_name = 1;
   // Intl.DateTimeFormat().resolvedOptions().timeZone)
   string timezone = 2;
+  bool is_ogg_capable = 3;
 }
 
 message GenerateExamResponse {
@@ -48,12 +50,14 @@ message ApplyExamResultRequest {
   string collection_name = 2;
   // Intl.DateTimeFormat().resolvedOptions().timeZone)
   string timezone = 3;
+  bool is_ogg_capable = 4;
 }
 
 message AddPhraseRequest {
   // TODO: refactor to a different message
   Phrase phrase = 1;
   string collection_name = 2;
+  VoiceType voice_type = 3;
 }
 
 message AddPhraseResponse {
@@ -73,6 +77,14 @@ message LoadCollectionsRequest {
 
 message LoadCollectionsResponse {
   repeated string names = 1;
+}
+
+message UpdateAudioInCollectionRequest {
+  string name = 1;
+}
+
+message UpdateAudioInCollectionResponse {
+  string name = 1;
 }
 
 message UpdateCollectionRequest {

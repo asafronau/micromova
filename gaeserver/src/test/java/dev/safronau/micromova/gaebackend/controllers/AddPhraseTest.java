@@ -72,7 +72,9 @@ public class AddPhraseTest extends CommonControllerTest {
     assertThat(fakeFileStorage.list("texttospeech/3/"))
         .containsExactly(
             "texttospeech/3/2/U2NobWVsemvDpHNlIGlzdCBtaXIgc3VzcGVrdA==.mp3",
-            "texttospeech/3/1/U2NobWVsemvDpHNlIGlzdCBtaXIgc3VzcGVrdA==.mp3");
+            "texttospeech/3/1/U2NobWVsemvDpHNlIGlzdCBtaXIgc3VzcGVrdA==.mp3",
+            "texttospeech/3/2/U2NobWVsemvDpHNlIGlzdCBtaXIgc3VzcGVrdA==.ogg",
+            "texttospeech/3/1/U2NobWVsemvDpHNlIGlzdCBtaXIgc3VzcGVrdA==.ogg");
     assertThat(fakeDataStore.get(Constants.PHRASE_KEY_KIND, -9216743620397136613L).isPresent())
         .isTrue();
   }
@@ -100,7 +102,9 @@ public class AddPhraseTest extends CommonControllerTest {
     assertThat(fakeFileStorage.list("texttospeech/3/"))
         .containsExactly(
             "texttospeech/3/1/RsOka2UgRGXDvHRzY2ggTWXDn8OkZ2U=.mp3",
-            "texttospeech/3/2/RsOka2UgRGXDvHRzY2ggTWXDn8OkZ2U=.mp3");
+            "texttospeech/3/2/RsOka2UgRGXDvHRzY2ggTWXDn8OkZ2U=.mp3",
+            "texttospeech/3/1/RsOka2UgRGXDvHRzY2ggTWXDn8OkZ2U=.ogg",
+            "texttospeech/3/2/RsOka2UgRGXDvHRzY2ggTWXDn8OkZ2U=.ogg");
     assertThat(fakeDataStore.get(Constants.PHRASE_KEY_KIND, 4548451716323669398L).isPresent())
         .isTrue();
   }

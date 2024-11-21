@@ -22,6 +22,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Singleton
@@ -39,7 +41,7 @@ public class GoogleTextToSpeech implements TextToSpeech {
           Language.EN_US,
           "en-US",
           Language.DE,
-          "de",
+          "de-DE",
           Language.FR,
           "fr",
           Language.PL,
@@ -87,7 +89,12 @@ public class GoogleTextToSpeech implements TextToSpeech {
   }
 
   @Override
-  public ByteString synthesizeSpeech(String text, Language language, VoiceGender voiceGender) {
+  public ByteString synthesizeSpeech(
+      String text,
+      Language language,
+      VoiceGender voiceGender,
+      String encoding,
+      Map<VoiceGender, String> overrides) {
     logger.atInfo().log("Synthesizing %s %s %s", text, language, voiceGender);
     try {
       Texttospeech client =
@@ -97,15 +104,22 @@ public class GoogleTextToSpeech implements TextToSpeech {
                   new HttpCredentialsAdapter(GoogleCredentials.getApplicationDefault()))
               .setApplicationName(projectId)
               .build();
+      String name =
+          Optional.ofNullable(overrides.get(voiceGender))
+              .orElse(Objects.requireNonNull(TTS_VOICE_NAME.get(language, voiceGender)));
+      if (name.contains("Journey")
+          && (!text.endsWith(".") || !text.endsWith("!") || !text.endsWith("?"))) {
+        text += ".";
+      }
       SynthesizeSpeechRequest request =
           new SynthesizeSpeechRequest()
               .setInput(new SynthesisInput().setText(text))
               .setVoice(
                   new VoiceSelectionParams()
                       .setLanguageCode(getLanguageCode(language))
-                      .setName(TTS_VOICE_NAME.get(language, voiceGender))
+                      .setName(name)
                       .setSsmlGender(getSsmlVoiceGender(voiceGender)))
-              .setAudioConfig(new AudioConfig().setAudioEncoding("MP3_64_KBPS"));
+              .setAudioConfig(new AudioConfig().setAudioEncoding(encoding));
       return ByteString.copyFrom(client.text().synthesize(request).execute().decodeAudioContent());
     } catch (IOException | GeneralSecurityException e) {
       throw new IllegalStateException(e);

@@ -54,8 +54,16 @@ public class GoogleDatastore {
     return isValidId;
   }
 
-  public long putPhrase(String text, Language language, String femaleMp3, String maleMp3) {
-    logger.atInfo().log("Storing phrase(%s, %s, %s, %s)", text, language, femaleMp3, maleMp3);
+  public long putPhrase(
+      String text,
+      Language language,
+      String femaleMp3,
+      String maleMp3,
+      String femaleOgg,
+      String maleOgg) {
+    logger.atInfo().log(
+        "Storing phrase(%s, %s, %s, %s, %s, %s)",
+        text, language, femaleMp3, maleMp3, femaleOgg, maleOgg);
     long keyId = getPhraseKey(text, language);
     dataStore.put(
         Constants.PHRASE_KEY_KIND,
@@ -66,7 +74,9 @@ public class GoogleDatastore {
                     "text", new Value().setStringValue(text),
                     "language", new Value().setIntegerValue((long) language.getNumber()),
                     "female_mp3_path", new Value().setStringValue(femaleMp3),
-                    "male_mp3_path", new Value().setStringValue(maleMp3))));
+                    "male_mp3_path", new Value().setStringValue(maleMp3),
+                    "female_ogg_path", new Value().setStringValue(femaleOgg),
+                    "male_ogg_path", new Value().setStringValue(maleOgg))));
     return keyId;
   }
 

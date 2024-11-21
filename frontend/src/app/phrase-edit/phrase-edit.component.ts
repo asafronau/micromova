@@ -28,6 +28,7 @@ export class PhraseEditComponent  {
       this.collectionName = params['name'];
       const id = params['id'];
       this.isAdd = this.route.snapshot.data['isAdd'];
+      this.isJourney = false;
       if (!this.isAdd) {
         backend.loadPhrase(id, this.collectionName).subscribe(data => {
           this.phrase = <Phrase>data.getPhrase();
@@ -47,6 +48,7 @@ export class PhraseEditComponent  {
   phrase!: Phrase;
 
   isAdd = false;
+  isJourney = false;
 
   visible = true;
   selectable = true;
@@ -134,7 +136,7 @@ export class PhraseEditComponent  {
   }
 
   save(): void {
-    this.backend.addPhrase(this.collectionName, this.phrase).subscribe(response => {
+    this.backend.addPhrase(this.collectionName, this.phrase, this.isJourney).subscribe(response => {
       if (this.isAdd) {
         this.phrase = new Phrase();
         this.phrase.setSourceLanguage(this.collectionService.get().getSourceLanguage());

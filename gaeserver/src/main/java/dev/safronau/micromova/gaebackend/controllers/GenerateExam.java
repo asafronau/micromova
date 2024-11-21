@@ -42,6 +42,8 @@ public class GenerateExam {
     if (collection.equals(Collection.getDefaultInstance())) {
       throw new HttpStatusException(HttpStatus.BAD_REQUEST, "collection is missing");
     }
-    return examResponseBuilder.build(collection, clock, request.getTimezone()).toByteArray();
+    return examResponseBuilder
+        .build(collection, clock, request.getTimezone(), request.getIsOggCapable())
+        .toByteArray();
   }
 }
