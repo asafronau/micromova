@@ -101,7 +101,7 @@ public final class CliTest {
   }
 
   private static void migrate() {
-    LoadCollectionRequest req = LoadCollectionRequest.newBuilder().setName("andrei test 1").build();
+    LoadCollectionRequest req = LoadCollectionRequest.newBuilder().setName("deutsch 2021").build();
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request =
         HttpRequest.newBuilder()

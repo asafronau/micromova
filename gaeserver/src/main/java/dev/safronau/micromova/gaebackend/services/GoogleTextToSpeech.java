@@ -107,9 +107,11 @@ public class GoogleTextToSpeech implements TextToSpeech {
       String name =
           Optional.ofNullable(overrides.get(voiceGender))
               .orElse(Objects.requireNonNull(TTS_VOICE_NAME.get(language, voiceGender)));
-      if (name.contains("Journey")
-          && (!text.endsWith(".") || !text.endsWith("!") || !text.endsWith("?"))) {
-        text += ".";
+      if (name.contains("Journey")) {
+        text = text.substring(0, 1).toUpperCase() + text.substring(1);
+        if (!text.endsWith(".") || !text.endsWith("!") || !text.endsWith("?")) {
+          text += ".";
+        }
       }
       SynthesizeSpeechRequest request =
           new SynthesizeSpeechRequest()

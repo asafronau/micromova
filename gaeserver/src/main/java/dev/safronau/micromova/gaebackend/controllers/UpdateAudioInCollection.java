@@ -1,6 +1,7 @@
 package dev.safronau.micromova.gaebackend.controllers;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import dev.safronau.micromova.gaebackend.auth.Annotations.CurrentUserId;
 import dev.safronau.micromova.gaebackend.services.Constants;
@@ -9,6 +10,7 @@ import dev.safronau.micromova.gaebackend.services.GoogleStorage;
 import dev.safronau.micromova.gaebackend.services.TextToSpeech;
 import dev.safronau.micromova.proto.Collection;
 import dev.safronau.micromova.proto.Format;
+import dev.safronau.micromova.proto.Language;
 import dev.safronau.micromova.proto.Phrase;
 import dev.safronau.micromova.proto.Recording;
 import dev.safronau.micromova.proto.Type;
@@ -25,15 +27,10 @@ import io.micronaut.protobuf.codec.ProtobufferCodec;
 import io.micronaut.runtime.http.scope.RequestScope;
 import jakarta.inject.Inject;
 import java.time.Duration;
-import java.time.temporal.TemporalUnit;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 @RequestScope
@@ -67,17 +64,49 @@ public class UpdateAudioInCollection {
       throw new HttpStatusException(HttpStatus.BAD_REQUEST, "collection is missing");
     }
     Collection.Builder builder = collection.toBuilder();
-    var updatesPhrases =
-        collection.getPhraseList().stream()
-            /*.filter(
-                phrase ->
-                    !phrase.getRecordingList().stream()
-                        .map(Recording::getFormat)
-                        .collect(Collectors.toUnmodifiableSet())
-                        .contains(Format.OGG))*/
-            .map(this::getOrCreatePhrase)
-            .toList();
-    return
+
+    var sources = collection.getPhraseList().stream()
+        .filter(phrase -> phrase.getNormalizedText().split(" ").length >= 5)
+        .skip(100)
+        .toList();
+    /*var updatesPhrases =
+    collection.getPhraseList().stream()
+        .filter(phrase -> phrase.getNormalizedText().split(" ").length > 6)
+        .map(this::getOrCreatePhrase)
+        .toList();*/
+
+    System.out.printf("============ %s\n", sources.size());
+
+    Mono<Phrase> monos = Mono.empty();
+    for (var s : sources) {
+      monos =
+          monos.then(Mono.delay(Duration.ofSeconds(3))).then(
+              getOrCreatePhrase(s)
+                  .map(
+                      pp -> {
+                        Optional<Phrase.Builder> pb =
+                            builder.getPhraseBuilderList().stream()
+                                .filter(p -> p.getId() == pp.getId())
+                                .findFirst();
+                        pb.get()
+                            .setExample(pp.getExample())
+                            .clearTranslation()
+                            .addAllTranslation(pp.getTranslationList())
+                            .clearRecording()
+                            .addAllRecording(pp.getRecordingList())
+                            .setIsDiscoverable(pp.getIsDiscoverable());
+                        return pp;
+                      }));
+    }
+    return monos
+        .subscribeOn(Schedulers.single())
+        .map(
+            ee -> {
+              googleStorage.writeCollectionFile(builder.build());
+              return UpdateAudioInCollectionResponse.getDefaultInstance().toByteArray();
+            });
+
+    /*return
         Mono.zip(
                 updatesPhrases,
                 (Object[] responses) -> {
@@ -100,7 +129,7 @@ public class UpdateAudioInCollection {
             .subscribeOn(Schedulers.single()).map(e -> {
               googleStorage.writeCollectionFile(e);
               return UpdateAudioInCollectionResponse.getDefaultInstance().toByteArray();
-            });
+            });*/
 
     // System.out.println(col);
     // googleStorage.writeCollectionFile(builder.build());
@@ -124,7 +153,7 @@ public class UpdateAudioInCollection {
                     (String) responses[1],
                     (String) responses[2],
                     (String) responses[3]))
-        .subscribeOn(Schedulers.parallel());
+        .subscribeOn(Schedulers.single());
   }
 
   private Phrase produceResponse(
@@ -173,6 +202,19 @@ public class UpdateAudioInCollection {
 
   private Mono<String> synthesizeSpeechForGender(
       Phrase phrase, VoiceGender voiceGender, String encoding) {
+    Map<VoiceGender, String> map;
+    if (encoding.equals(Constants.OGG_ENCODING)) {
+      Language language = phrase.getSourceLanguage();
+      map =
+          ImmutableMap.of(
+              VoiceGender.FEMALE,
+              Objects.requireNonNull(
+                  Constants.JOURNEY_VOICE_NAME.get(language, VoiceGender.FEMALE)),
+              VoiceGender.MALE,
+              Objects.requireNonNull(Constants.JOURNEY_VOICE_NAME.get(language, VoiceGender.MALE)));
+    } else {
+      map = Map.of();
+    }
     return Mono.fromCallable(
             () ->
                 textToSpeech.synthesizeSpeech(
@@ -180,7 +222,7 @@ public class UpdateAudioInCollection {
                     phrase.getSourceLanguage(),
                     voiceGender,
                     encoding,
-                    Map.of()))
+                    map))
         .map(
             bytes ->
                 googleStorage.writeAudioFile(

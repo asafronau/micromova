@@ -15,7 +15,7 @@ public final class Constants {
   public static final ImmutableTable<Language, VoiceGender, String> JOURNEY_VOICE_NAME =
       ImmutableTable.<Language, VoiceGender, String>builder()
           .put(Language.DE, VoiceGender.FEMALE, "de-DE-Journey-F")
-          .put(Language.DE, VoiceGender.MALE, "de-DE-Journey-D")
+          .put(Language.DE, VoiceGender.MALE, "de-DE-Journey-O")
           .put(Language.EN_US, VoiceGender.FEMALE, "en-US-Journey-F")
           .put(Language.EN_US, VoiceGender.MALE, "en-US-Journey-D")
           .put(Language.FR, VoiceGender.FEMALE, "fr-FR-Journey-F")
