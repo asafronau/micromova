@@ -43,7 +43,7 @@ public class GoogleTextToSpeech implements TextToSpeech {
           Language.DE,
           "de-DE",
           Language.FR,
-          "fr",
+          "fr-fr",
           Language.PL,
           "pl",
           Language.IT,
